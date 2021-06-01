@@ -5,7 +5,7 @@
 # Version très basique, sans mutex sur l'écran, sans arbitre, sans annoncer le gagant, ... ...
 # Sans mutex écran
 
-CLEARSCR="\x1B[2J\x1B[;H"        #  Clear SCReen
+CLEARSCR = "\x1B[2J\x1B[;H"        #  Clear SCReen
 CLEAREOS = "\x1B[J"                #  Clear End Of Screen
 CLEARELN = "\x1B[2K"               #  Clear Entire LiNe
 CLEARCUP = "\x1B[1J"               #  Clear Curseur UP
@@ -47,19 +47,20 @@ CL_WHITE="\033[01;37m"                  #  Blanc
 
 #-------------------------------------------------------
 
-import multiprocessing as mp #CHANGEMENT
+import multiprocessing as mp 
 import os, time,math, random, sys, ctypes
+#from multiprocessing import Process, Value, Lock
+#from array import array                             # Attention : différent des 'Array' des Process
 
-#tailleImage = 4
-LONGEUR_COURSE = 100 # Tout le monde aura la m�me copie (donc no need to have a 'value')
+LONGEUR_COURSE = 100 
 keep_running = mp.Value(ctypes.c_bool, True)
 
-# Une liste de couleurs � affecter al�atoirement aux chevaux
-lyst_colors = [CL_WHITE, CL_RED, CL_GREEN, CL_BROWN , CL_BLUE, CL_MAGENTA, CL_CYAN, CL_GRAY,
-             CL_DARKGRAY, CL_LIGHTRED, CL_LIGHTGREEN,  CL_LIGHTBLU, CL_YELLOW, CL_LIGHTMAGENTA, CL_LIGHTCYAN]
+lyst_colors = [CL_WHITE, CL_RED, CL_GREEN, CL_BROWN , CL_BLUE, CL_MAGENTA, CL_CYAN, CL_GRAY, CL_DARKGRAY, CL_LIGHTRED, CL_LIGHTGREEN, \
+             CL_LIGHTBLU, CL_YELLOW, CL_LIGHTMAGENTA, CL_LIGHTCYAN]
 
 def effacer_ecran() : 
     print(CLEARSCR,end='')
+#    for n in range(0, 64, 1): print("\r\n",end='')
 
 def erase_line_from_beg_to_course() : 
     print("\033[1K",end='')
@@ -70,19 +71,20 @@ def curseur_invisible() :
 def curseur_visible() : 
     print(CURSON,end='')
 
-def move_to(lig, col) : 
+def move_to(lig, col) :         # No work print("\033[%i;%if"%(lig, col)) # print(GOTOYX%(x,y))
     print("\033[" + str(lig) + ";" + str(col) + "f",end='')
 
 def en_couleur(Coul) : 
     print(Coul,end='')
 
 def en_rouge() : 
-    print(CL_RED,end='') # Un exemple !
+    print(CL_RED,end='')
 
 
-# La tache d'un cheval
-def un_cheval(mutexPosition, tablCol, mutex, ma_ligne : int) : # ma_ligne commence � 0
-    col=1
+def un_cheval(mutex_position, tablCol, mutex, ma_ligne : int) : # ma_ligne commence � 0
+    # move_to(20, 1); print("Le chaval ", chr(ord('A')+ma_ligne), " démarre ...")
+    col = 1
+
     while col < LONGEUR_COURSE and keep_running.value :
         
         mutex.acquire()
@@ -90,37 +92,17 @@ def un_cheval(mutexPosition, tablCol, mutex, ma_ligne : int) : # ma_ligne commen
         erase_line_from_beg_to_course()
         en_couleur(lyst_colors[ma_ligne%len(lyst_colors)])
         print('('+chr(ord('A')+ma_ligne)+'>')
-        
-        
-        #print('_'+'['+chr(ord('0')+ma_ligne)+']'+'_' )
-        
-        #print(' '+' '+' '+' '+' '+'_'+'_'+'_'+'_'+'_')
-
-        #move_to(tailleImage*ma_ligne+2,col)         # pour effacer toute ma ligne
-        #erase_line_from_beg_to_course()
-        #print('('+'°'+'o'+'°'+')')
-#        print(' '+'_'+'_'+'/'+' '+' '+chr(ord('A')+ma_ligne)+'_'+'_'+'8'+')')
-
-        #move_to(tailleImage*ma_ligne+3,col)         # pour effacer toute ma ligne
-        #erase_line_from_beg_to_course()
-        #print(' '+'('+':'+')' )
-#        print('('+'_'+'_'+'_'+'_'+'/')
-
-        #move_to(tailleImage*ma_ligne+4,col)         # pour effacer toute ma ligne
-        #erase_line_from_beg_to_course()
-        #print(' ')
         mutex.release()
         
         col+=1
 
-        mutexPosition.acquire()
+        mutex_position.acquire()
         tablCol[ma_ligne] = col
-        mutexPosition.release()
+        mutex_position.release()
 
         time.sleep(0.005 * random.randint(1,50))
 
-#Arbitre
-def arbitre_score(chevalGagnant, mutexPosition, ligne, T): #indice = cheval
+def label_arbitre(cheval_en_tete, mutex_position, ligne, T): 
     
     for i in range(len(T)):
         T[i] = 0
@@ -130,84 +112,87 @@ def arbitre_score(chevalGagnant, mutexPosition, ligne, T): #indice = cheval
     while maxCol < LONGEUR_COURSE and keep_running.value:
         en_couleur(lyst_colors[0%len(lyst_colors)])
         move_to(ligne, 4)
-        idxBest = []
-        idxNaze = []
+        id_premier = []
+        id_dernier = []
 
-        mutexPosition.acquire()
+        mutex_position.acquire()
 
         maxCol = max(T)
         minCol = min(T)
 
-        for idx in range(len(T)):
-            if T[idx] == maxCol:
-                idxBest.append(idx)
+        for val in range(len(T)):
+            if T[val] == maxCol:
+                id_premier.append(val)
 
-            elif T[idx] == minCol:
-                idxNaze.append(idx)
+            elif T[val] == minCol:
+                id_dernier.append(val)
 
-        mutexPosition.release()
+        mutex_position.release()
 
-        strBest = ''
-        strNaze = ''
+        affichage_premier = ''
+        affichage_dernier = ''
 
-        for i in idxBest:
-            strBest += chr(ord('0')+i)+' '
+        for i in id_premier:
+            affichage_premier += chr(ord('0')+i)+' '
 
-        for i in idxNaze:
-            strNaze += chr(ord('0')+i)+' '
+        for i in id_dernier:
+            affichage_dernier += chr(ord('0')+i)+' '
 
         move_to(ligne, 50)
         erase_line_from_beg_to_course()
+
         move_to(ligne, 4)
-        print('PREMIER : '+strBest)
+        print('PREMIER : '+affichage_premier)
+
         move_to(ligne+1, 50)
         erase_line_from_beg_to_course()
+
         move_to(ligne+1, 4)
-        print('DERNIER : '+strNaze)
+        print('DERNIER : '+affichage_dernier)
 
     #Le premier est arrivé, trouvons le dernier
     while minCol < LONGEUR_COURSE-1 and keep_running.value:
         en_couleur(lyst_colors[0%len(lyst_colors)])
         move_to(ligne, 4)
-        idxNaze = []
+        id_dernier = []
 
-        mutexPosition.acquire()
+        mutex_position.acquire()
 
         minCol = min(T)
 
-        for idx in range(len(T)):
-            if T[idx] == minCol:
-                idxNaze.append(idx)
+        for val in range(len(T)):
+            if T[val] == minCol:
+                id_dernier.append(val)
 
-        mutexPosition.release()
+        mutex_position.release()
 
-        strNaze = ''
-        for i in idxNaze:
-            strNaze += chr(ord('0')+i)+' '
+        affichage_dernier = ''
+        for i in id_dernier:
+            affichage_dernier += chr(ord('0')+i)+' '
 
         move_to(ligne+1, 50)
         erase_line_from_beg_to_course()
         move_to(ligne+1, 4)
-        print('Dernier : '+strNaze)
+        print('Dernier : '+affichage_dernier)
 
-    for i in idxBest:
-        chevalGagnant[i] = i
+    for i in id_premier:
+        cheval_en_tete[i] = i
 
 #------------------------------------------------
 # La partie principale :
 
 def course_hippique() :
-    laBonnePrediction = False
+    resultat_final = False
     Nb_process=10
 
-    prediction = input('Votre prédiction entre 1 et '+chr(ord('0')+Nb_process-1)+' inclus : ')
+    prediction = input('Sur quel cheval souhaitez-vous miser? Veuillez choisir entre 0 et '+chr(ord('0')+Nb_process-1)+' inclus : ')
 
 
-    mutexAffichage = mp.Lock()
-    mutexPosition = mp.Lock()
+    mutex_affichage = mp.Lock()
+    mutex_position = mp.Lock()
 
     tablCol = mp.Array('i', Nb_process)
-    chevalGagnant = mp.Array('i', [101 for i in range(Nb_process)])
+    cheval_en_tete = mp.Array('i', [101 for i in range(Nb_process)])
 
     mes_process = [0 for i in range(Nb_process+1)]
     effacer_ecran()
@@ -215,13 +200,13 @@ def course_hippique() :
 
 
     for i in range(Nb_process):  # Lancer     Nb_process  processus
-        mes_process[i] = mp.Process(target=un_cheval, args= (mutexPosition, tablCol,mutexAffichage, i)) #CHANGEMENT
+        mes_process[i] = mp.Process(target = un_cheval, args= (mutex_position, tablCol,mutex_affichage, i)) #CHANGEMENT
         mes_process[i].start()
 
-    ProcessArbitre = mp.Process(target=arbitre_score, args=(chevalGagnant, mutexPosition, Nb_process + 2, tablCol ))
+    process_arbitre = mp.Process(target = label_arbitre, args=(cheval_en_tete, mutex_position, Nb_process + 2, tablCol ))
 
-    ProcessArbitre.start()
-    mes_process[Nb_process] = ProcessArbitre
+    process_arbitre.start()
+    mes_process[Nb_process] = process_arbitre
 
     en_couleur(lyst_colors[0%len(lyst_colors)])
     move_to(Nb_process+4, 1)
@@ -235,12 +220,12 @@ def course_hippique() :
     curseur_visible()
     print("Fin de la course !")
 
-    for i in chevalGagnant:
+    for i in cheval_en_tete:
         if i == int(prediction):
             print('BONNE PREDICTION')
-            laBonnePrediction = True
+            resultat_final = True
 
-    if laBonnePrediction == False:
+    if resultat_final == False:
         print('MAUVAISE PREDICTION')
     
 # La partie principale :
