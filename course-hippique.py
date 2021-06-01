@@ -1,9 +1,10 @@
-#  Nov 2020
+# Mai 2021
+# BINOME : CURRAL Maxime - NGUYEN Hien
 # Exécuter sous Linux
 # Cours hippique
 # Version très basique, sans mutex sur l'écran, sans arbitre, sans annoncer le gagant, ... ...
+# Sans mutex écran
 
-# Quelques codes d'échappement (tous ne sont pas utilisés)
 CLEARSCR="\x1B[2J\x1B[;H"          #  Clear SCReen
 CLEAREOS = "\x1B[J"                #  Clear End Of Screen
 CLEARELN = "\x1B[2K"               #  Clear Entire LiNe
@@ -47,8 +48,8 @@ CL_WHITE="\033[01;37m"                  #  Blanc
 # Juin 2019
 # Cours hippique
 # Version très basique, sans mutex sur l'écran, sans arbitre, sans annoncer le gagant, ... ...
+# Sans mutex écran
 
-# Quelques codes d'échappement (tous ne sont pas utilisés)
 CLEARSCR="\x1B[2J\x1B[;H"          #  Clear SCReen
 CLEAREOS = "\x1B[J"                #  Clear End Of Screen
 CLEARELN = "\x1B[2K"               #  Clear Entire LiNe
@@ -90,28 +91,42 @@ CL_WHITE="\033[01;37m"                  #  Blanc
 
 #-------------------------------------------------------
 
+import multiprocessing as mp
 from multiprocessing import Process 
 import os, time,math, random, sys, ctypes
 
-LONGEUR_COURSE = 100 # Tout le monde aura la même copie (donc no need to have a 'value')
-keep_running=mp.Value(ctypes.c_bool, True)
+LONGEUR_COURSE = 100                    # Tout le monde aura la même copie (donc no need to have a 'value')
+keep_running= mp.Value(ctypes.c_bool, True)
 
 # Une liste de couleurs à affecter aléatoirement aux chevaux
-lyst_colors=[CL_WHITE, CL_RED, CL_GREEN, CL_BROWN , CL_BLUE, CL_MAGENTA, CL_CYAN, CL_GRAY,
-             CL_DARKGRAY, CL_LIGHTRED, CL_LIGHTGREEN,  CL_LIGHTBLU, CL_YELLOW, CL_LIGHTMAGENTA, CL_LIGHTCYAN]
+lyst_colors=[CL_WHITE, CL_RED, CL_GREEN, CL_BROWN , CL_BLUE, CL_MAGENTA, CL_CYAN, CL_GRAY, CL_DARKGRAY, CL_LIGHTRED, CL_LIGHTGREEN, \
+             CL_LIGHTBLU, CL_YELLOW, CL_LIGHTMAGENTA, CL_LIGHTCYAN]
 
-def effacer_ecran() : print(CLEARSCR,end='')
-def erase_line_from_beg_to_curs() : print("\033[1K",end='')
-def curseur_invisible() : print(CURSOFF,end='')
-def curseur_visible() : print(CURSON,end='')
-def move_to(lig, col) : print("\033[" + str(lig) + ";" + str(col) + "f",end='')
+def effacer_ecran() : 
+    print(CLEARSCR,end='')
+    # for n in range(0, 64, 1): print("\r\n",end='')
 
-def en_couleur(Coul) : print(Coul,end='')
-def en_rouge() : print(CL_RED,end='') # Un exemple !
+def erase_line_from_beg_to_curs() : 
+    print("\033[1K",end='')
+
+def curseur_invisible() : 
+    print(CURSOFF,end='')
+
+def curseur_visible() : 
+    print(CURSON,end='')
+
+def move_to(lig, col) :                 # No work print("\033[%i;%if"%(lig, col)) # print(GOTOYX%(x,y))
+    print("\033[" + str(lig) + ";" + str(col) + "f",end='')
+
+def en_couleur(Coul) : 
+    print(Coul,end='')
+
+def en_rouge() : 
+    print(CL_RED,end='')
 
 
-# La tache d'un cheval
-def un_cheval(ma_ligne : int) : # ma_ligne commence à 0
+def un_cheval(ma_ligne : int) :         # ma_ligne commence à 0
+    # move_to(20, 1); print("Le chaval ", chr(ord('A')+ma_ligne), " démarre ...")
     col=1
 
     while col < LONGEUR_COURSE and keep_running.value :

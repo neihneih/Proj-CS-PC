@@ -1,4 +1,5 @@
-#  Nov 2020
+# Mai 2021
+# BINOME : CURRAL Maxime - NGUYEN Hien
 # Exécuter sous Linux
 # Cours hippique
 # Version très basique, sans mutex sur l'écran, sans arbitre, sans annoncer le gagant, ... ...
@@ -50,23 +51,32 @@ import os, time,math, random, sys
 from array import array  # Attention : différent des 'Array' des Process
 
 keep_running=True # Fin de la course ?
+
+# Une liste de couleurs à affecter aléatoirement aux chevaux
 lyst_colors=[CL_WHITE, CL_RED, CL_GREEN, CL_BROWN , CL_BLUE, CL_MAGENTA, CL_CYAN, CL_GRAY, CL_DARKGRAY, CL_LIGHTRED, CL_LIGHTGREEN, \
              CL_LIGHTBLU, CL_YELLOW, CL_LIGHTMAGENTA, CL_LIGHTCYAN]
 
-def effacer_ecran() : print(CLEARSCR,end='')
+def effacer_ecran() : 
+    print(CLEARSCR,end='')
     # for n in range(0, 64, 1): print("\r\n",end='')
 
 def erase_line_from_beg_to_curs() :
     print("\033[1K",end='')
 
-def curseur_invisible() : print(CURSOFF,end='')
-def curseur_visible() : print(CURSON,end='')
+def curseur_invisible() : 
+    print(CURSOFF,end='')
+
+def curseur_visible() : 
+    print(CURSON,end='')
 
 def move_to(lig, col) : # No work print("\033[%i;%if"%(lig, col)) # print(GOTOYX%(x,y))
     print("\033[" + str(lig) + ";" + str(col) + "f",end='')
 
-def en_couleur(Coul) : print(Coul,end='')
-def en_rouge() : print(CL_RED,end='')
+def en_couleur(Coul) : 
+    print(Coul,end='')
+
+def en_rouge() : 
+    print(CL_RED,end='')
 
 
 def un_cheval(ma_ligne : int) : # ma_ligne commence à 0
