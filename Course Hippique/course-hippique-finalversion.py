@@ -109,6 +109,7 @@ def label_arbitre(cheval_en_tete, mutex_position, ligne, T):
 
     maxCol = 0
 
+    # Cherche le premier
     while maxCol < LONGEUR_COURSE and keep_running.value:
         en_couleur(lyst_colors[0%len(lyst_colors)])
         move_to(ligne, 4)
@@ -150,7 +151,7 @@ def label_arbitre(cheval_en_tete, mutex_position, ligne, T):
         move_to(ligne+1, 4)
         print('DERNIER : '+affichage_dernier)
 
-    #Le premier est arrivé, trouvons le dernier
+    # Cherche le dernier
     while minCol < LONGEUR_COURSE-1 and keep_running.value:
         en_couleur(lyst_colors[0%len(lyst_colors)])
         move_to(ligne, 4)
@@ -178,8 +179,6 @@ def label_arbitre(cheval_en_tete, mutex_position, ligne, T):
     for i in id_premier:
         cheval_en_tete[i] = i
 
-#------------------------------------------------
-# La partie principale :
 
 def course_hippique() :
     resultat_final = False
