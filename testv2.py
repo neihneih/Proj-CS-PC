@@ -207,7 +207,7 @@ def arbitre_score(chevalGagnant, mutexPosition, ligne, T): #indice = cheval
         move_to(ligne+1, 4)
         print('DERNIER : '+strNaze)
 
-    #Le premier est arrivé, trouvons le dernier
+    #Le premier est arrivé, trouvons le DERNIER
     while minCol < LONGEUR_COURSE-1 and keep_running.value:
         en_couleur(lyst_colors[0%len(lyst_colors)])
         move_to(ligne, 4)
@@ -230,7 +230,7 @@ def arbitre_score(chevalGagnant, mutexPosition, ligne, T): #indice = cheval
         move_to(ligne+1, 50)
         erase_line_from_beg_to_course()
         move_to(ligne+1, 4)
-        print('Dernier : '+strNaze)
+        print('DERNIER : '+strNaze)
 
     for i in idxBest:
         chevalGagnant[i] = i
