@@ -5,34 +5,34 @@
 # Version très basique, sans mutex sur l'écran, sans arbitre, sans annoncer le gagant, ... ...
 # Sans mutex écran
 
-CLEARSCR="\x1B[2J\x1B[;H"        #  Clear SCReen
+CLEARSCR="\x1B[2J\x1B[;H"          #  Clear SCReen
 CLEAREOS = "\x1B[J"                #  Clear End Of Screen
 CLEARELN = "\x1B[2K"               #  Clear Entire LiNe
 CLEARCUP = "\x1B[1J"               #  Clear Curseur UP
 GOTOYX   = "\x1B[%.2d;%.2dH"       #  Goto at (y,x), voir le code
 
 DELAFCURSOR = "\x1B[K"
-CRLF  = "\r\n"                  #  Retour à la ligne
+CRLF  = "\r\n"                     #  Retour à la ligne
 
 # VT100 : Actions sur le curseur
 CURSON   = "\x1B[?25h"             #  Curseur visible
 CURSOFF  = "\x1B[?25l"             #  Curseur invisible
 
 # VT100 : Actions sur les caractères affichables
-NORMAL = "\x1B[0m"                  #  Normal
-BOLD = "\x1B[1m"                    #  Gras
-UNDERLINE = "\x1B[4m"               #  Souligné
+NORMAL = "\x1B[0m"                 #  Normal
+BOLD = "\x1B[1m"                   #  Gras
+UNDERLINE = "\x1B[4m"              #  Souligné
 
 
 # VT100 : Couleurs : "22" pour normal intensity
-CL_BLACK="\033[22;30m"                  #  Noir. NE PAS UTILISER. On verra rien !!
-CL_RED="\033[22;31m"                    #  Rouge
-CL_GREEN="\033[22;32m"                  #  Vert
-CL_BROWN = "\033[22;33m"                #  Brun
-CL_BLUE="\033[22;34m"                   #  Bleu
-CL_MAGENTA="\033[22;35m"                #  Magenta
-CL_CYAN="\033[22;36m"                   #  Cyan
-CL_GRAY="\033[22;37m"                   #  Gris
+CL_BLACK="\033[22;30m"             #  Noir. NE PAS UTILISER. On verra rien !!
+CL_RED="\033[22;31m"               #  Rouge
+CL_GREEN="\033[22;32m"             #  Vert
+CL_BROWN = "\033[22;33m"           #  Brun
+CL_BLUE="\033[22;34m"              #  Bleu
+CL_MAGENTA="\033[22;35m"           #  Magenta
+CL_CYAN="\033[22;36m"              #  Cyan
+CL_GRAY="\033[22;37m"              #  Gris
 
 # "01" pour quoi ? (bold ?)
 CL_DARKGRAY="\033[01;30m"               #  Gris foncé
@@ -50,7 +50,6 @@ CL_WHITE="\033[01;37m"                  #  Blanc
 import multiprocessing as mp #CHANGEMENT
 import os, time,math, random, sys, ctypes
 
-#tailleImage = 4
 LONGEUR_COURSE = 100 # Tout le monde aura la m�me copie (donc no need to have a 'value')
 keep_running = mp.Value(ctypes.c_bool, True)
 
