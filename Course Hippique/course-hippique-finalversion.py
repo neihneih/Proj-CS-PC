@@ -94,13 +94,14 @@ def un_cheval(mutex_position, tablCol, mutex, ma_ligne : int) : # ma_ligne comme
         print('('+chr(ord('A')+ma_ligne)+'>')
         mutex.release()
         
-        col+=1
+        col += 1
 
         mutex_position.acquire()
         tablCol[ma_ligne] = col
         mutex_position.release()
 
         time.sleep(0.005 * random.randint(1,50))
+
 
 def label_arbitre(cheval_en_tete, mutex_position, ligne, T): 
     
@@ -117,7 +118,6 @@ def label_arbitre(cheval_en_tete, mutex_position, ligne, T):
         id_dernier = []
 
         mutex_position.acquire()
-
         maxCol = max(T)
         minCol = min(T)
 
@@ -127,44 +127,41 @@ def label_arbitre(cheval_en_tete, mutex_position, ligne, T):
 
             elif T[val] == minCol:
                 id_dernier.append(val)
-
         mutex_position.release()
 
         affichage_premier = ''
         affichage_dernier = ''
 
         for i in id_premier:
-            affichage_premier += chr(ord('0')+i)+' '
+            affichage_premier += chr(ord('0') + i) + ' '
 
         for i in id_dernier:
-            affichage_dernier += chr(ord('0')+i)+' '
+            affichage_dernier += chr(ord('0') + i) + ' '
 
         move_to(ligne, 50)
         erase_line_from_beg_to_course()
 
         move_to(ligne, 4)
-        print('PREMIER : '+affichage_premier)
+        print('PREMIER : ' + affichage_premier)
 
         move_to(ligne+1, 50)
         erase_line_from_beg_to_course()
 
         move_to(ligne+1, 4)
-        print('DERNIER : '+affichage_dernier)
+        print('DERNIER : ' + affichage_dernier)
 
-    # Cherche le dernier
+
     while minCol < LONGEUR_COURSE-1 and keep_running.value:
         en_couleur(lyst_colors[0%len(lyst_colors)])
         move_to(ligne, 4)
         id_dernier = []
 
         mutex_position.acquire()
-
         minCol = min(T)
 
         for val in range(len(T)):
             if T[val] == minCol:
                 id_dernier.append(val)
-
         mutex_position.release()
 
         affichage_dernier = ''
@@ -182,9 +179,9 @@ def label_arbitre(cheval_en_tete, mutex_position, ligne, T):
 
 def course_hippique() :
     resultat_final = False
-    Nb_process=10
+    Nb_process = 10
 
-    prediction = input('Sur quel cheval souhaitez-vous miser? Veuillez choisir entre 0 et '+chr(ord('0')+Nb_process-1)+' inclus : ')
+    prediction = input('Sur quel cheval souhaitez-vous miser? Veuillez choisir entre 0 et ' + chr(ord('0') + Nb_process - 1) + ' inclus : ')
 
 
     mutex_affichage = mp.Lock()
@@ -199,23 +196,23 @@ def course_hippique() :
 
 
     for i in range(Nb_process):  # Lancer     Nb_process  processus
-        mes_process[i] = mp.Process(target = un_cheval, args= (mutex_position, tablCol,mutex_affichage, i)) #CHANGEMENT
+        mes_process[i] = mp.Process(target = un_cheval, args = (mutex_position, tablCol,mutex_affichage, i)) #CHANGEMENT
         mes_process[i].start()
 
-    process_arbitre = mp.Process(target = label_arbitre, args=(cheval_en_tete, mutex_position, Nb_process + 2, tablCol ))
+    process_arbitre = mp.Process(target = label_arbitre, args =(cheval_en_tete, mutex_position, Nb_process + 2, tablCol ))
 
     process_arbitre.start()
     mes_process[Nb_process] = process_arbitre
 
     en_couleur(lyst_colors[0%len(lyst_colors)])
-    move_to(Nb_process+4, 1)
+    move_to(Nb_process + 4, 1)
     print("La course a commencé !")
-    print('Votre prediction est : '+str(prediction))
+    print('Vous avez misé sur le cheval '+str(prediction))
 
-    for i in range(Nb_process+1): mes_process[i].join()
+    for i in range(Nb_process + 1): mes_process[i].join()
 
     en_couleur(lyst_colors[0%len(lyst_colors)])
-    move_to(Nb_process+6, 1)
+    move_to(Nb_process + 6, 1)
     curseur_visible()
     print("Fin de la course !")
 

@@ -21,7 +21,6 @@ CL_BLACK = "\033[22;30m"                  #Noir
 
 
 #-------------------------------------------------------------
-
 def effacer_ecran() : 
     print(CLEARSCR,end='')
 
@@ -41,10 +40,9 @@ def couleur_txt(Coul) :
     print(Coul,end='')
 
 
-
-def indice_to_coord(X,nbCol):
-    colonne = X % nbCol
-    ligne = X // nbCol
+def indice_to_coord(X,nb_colonnes):
+    colonne = X % nb_colonnes
+    ligne = X // nb_colonnes
     return [ligne, colonne]
 
 
