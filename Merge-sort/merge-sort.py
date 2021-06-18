@@ -1,55 +1,60 @@
-import math, random, time, os
-from array import array
+import time, random, os
 import multiprocessing as mp
+import numpy as np
+import SharedArray as sa
+from array import array
 
-def merge(left, right):
+def merge(left, right, jeton_array):
     tableau = array('i', [])  # tableau vide qui reçoit les résultats
     while len(left) > 0 and len(right) > 0:
         if left[0] < right[0]: tableau.append(left.pop(0))
         else: tableau.append(right.pop(0))
-
     tableau += left + right
-    return tableau
+    jeton_array.acquire()
+    tableau_trie.append(tableau) #cette instruction n'est pas possible. il faut changer les éléments 1 a 1 avec tableau_trie[0]=0 par exemple
+    
 
-def merge_sort(Tableau):
-    length_Tableau = len(Tableau)
-    if length_Tableau <= 1: return Tableau
-    mid = length_Tableau // 2
-    tab_left = Tableau[0:mid]
-    tab_right = Tableau[mid:]
-    tab_left = merge_sort(tab_left)
-    tab_right = merge_sort(tab_right)
-    return merge(tab_left, tab_right)
 
-def merge_sort_processus(Tableau, nombre_processus):
-    liste_processus = []
-    Tab = []
-    length_Tableau = len(Tableau)
-    taille_division = length_Tableau // nombre_processus
-    if length_Tableau <= 1: return Tableau
-    for numero_processus in range(nombre_processus):
-        Tab == Tableau[numero_processus * taille_division : numero_processus * (taille_division + 1)]
-        retour = os.fork()
-        mid = len(Tab) // 2
-        tab_left = Tab[0:mid]
-        tab_right = Tab[mid:]
-        if retour != 0:
-            process = mp.Process(target=merge_sort_processus, args=(tab_right)) #le fils fait un merge_sort
-        process = mp.Process(target=merge_sort_processus, args=(tab_left))
-        liste_processus.append(process)
-        process.start()
-        for p in liste_processus:
-            p.join()
-        return merge(tab_left, tab_right)
+def merge_sort(Tableau_a_trier,borne_left, borne_right, jeton_value, jeton_array):
+    length_Tableau_a_trier = len(Tableau_a_trier)
+    if length_Tableau_a_trier <= 1:
+        return Tableau_a_trier
+    mid = borne_left + (borne_right - borne_left)//2
+    left = Tableau_a_trier[borne_left:mid]
+    right = Tableau_a_trier[mid:borne_right]
 
-def version_de_base(N):
+    jeton_value.acquire()
+    n = nombre_processus_dispos.value
+    if n > 0:
+        #cas où il y a des processus disponibles
+        nombre_processus_dispos.value -= 1
+
+        #processus tableau de gauche
+        left = mp.Process(target = merge_sort, args=(Tableau_a_trier, borne_left, (borne_left + borne_right)//2 , jeton_value, jeton_array))
+        left.start()
+        left.join()
+        nombre_processus_dispos.value =+ 1
+        jeton_value.release()
+
+        #processus tableau de droite
+        right = merge_sort(Tableau_a_trier, (borne_left + borne_right)//2 + 1, borne_right, jeton_value, jeton_array)
+    else:
+        #cas où il n'y a plus de processus disponibles 
+        left = merge_sort(Tableau_a_trier, borne_left, (borne_left + borne_right)//2, jeton_value, jeton_array)
+        right = merge_sort(Tableau_a_trier, (borne_left + borne_right)//2 + 1, borne_right, jeton_value, jeton_array)
+    return merge(left, right, jeton_array)
+
+
+
+
+def version_de_base(N, jeton_value):
     Tab = array('i', [random.randint(0, 2 * N) for _ in range(N)]) 
-    #print("Avant : ", Tab)
+    print("Avant : ", Tab)
     start=time.time()
-    Tab = merge_sort(Tab)
+    Tab = merge_sort(Tab, 0, len(Tab), jeton_value, jeton_array)
     end=time.time()
     print("Après : ", Tab)
-    print("Le temps avec 1 seul Process = %f pour un tableau de %d éléments " % ((end-start)*1000, N))
+    print("Le temps avec 1 seul Process = %f pour un tableau de %d eles " % ((end-start)*1000, N))
     
     print("Vérifions que le tri est correct --> ", end='')
     try :
@@ -57,20 +62,15 @@ def version_de_base(N):
         print("Le tri est OK !")
     except : print(" Le tri n'a pas marché !")
 
-def version_processus(N, nombre_processus):
-    Tab = array('i', [random.randint(0, 2 * N) for _ in range(N)]) 
-    #print("Avant : ", Tab)
-    start=time.time()
-    Tab = merge_sort_processus(Tab, nombre_processus)
-    end=time.time()
-    print("Après : ", Tab)
-    print("Le temps avec 1 seul Process = %f pour un tableau de %d éléments " % ((end-start)*1000, N))
-    
-    print("Vérifions que le tri est correct --> ", end='')
-    try :
-        assert(all([(Tab[i] <= Tab[i+1]) for i in range(N-1)]))
-        print("Le tri est OK !")
-    except : print(" Le tri n'a pas marché !")
 
-N = 50
-version_processus(N, 1)
+if __name__ == "__main__" :
+    N = 24
+    nombre_processus = 4
+
+    jeton_value = mp.Lock()
+    nombre_processus_dispos = mp.Value('i', nombre_processus)
+    
+    jeton_array = mp.Lock()
+    tableau_trie = mp.Array('i', [0 for i in range(nombre_processus)])
+
+    version_de_base(N, jeton_value)

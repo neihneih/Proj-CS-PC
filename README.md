@@ -19,7 +19,7 @@ STATUS
 Course hippique : Bien avancé, regarder comment améliorer l'affichage 
     du dernier
 
-Merge-Sort : Commencé
+Merge-Sort : Le programme ne marche pas complètement à cause d'un problème de SharedArray entre autres. 
 
 Game Of Life : Pas commencé
 
